@@ -1,0 +1,26 @@
+# Optional Render Blueprint. You can either use this file (New + → Blueprint)
+# or configure the same settings manually in the Render dashboard.
+# Secrets (MONGO_URI, JWT_SECRET, CORS_ORIGIN) are marked sync:false so Render
+# prompts you to enter them — never commit real secret values.
+services:
+  - type: web
+    name: restaurant-reservation-api
+    runtime: node
+    plan: free
+    # Backend lives at the repo root, so no rootDir is needed.
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: PORT
+        value: "10000"
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: CORS_ORIGIN
+        sync: false
