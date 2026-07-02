@@ -1,0 +1,111 @@
+### Restaurant Reservation API — manual test flow
+### Use with the VS Code "REST Client" extension (humao.rest-client).
+### Click "Send Request" above each block, top to bottom.
+### Tokens are captured automatically into variables between requests.
+
+@baseUrl = http://localhost:5000
+
+### 0. Health check
+GET {{baseUrl}}/health
+
+### 1a. Register a customer  -> 201
+# @name registerCustomer
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Alice Customer",
+  "email": "alice@example.com",
+  "password": "secret123"
+}
+
+### 1b. Log in as the customer -> 200, capture token
+# @name loginCustomer
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "alice@example.com",
+  "password": "secret123"
+}
+
+###
+@customerToken = {{loginCustomer.response.body.token}}
+
+### (helper) See which tables exist / are available for the slot -> 200
+GET {{baseUrl}}/api/tables/available?date=2026-12-31&timeSlot=19:00&guests=2
+Authorization: Bearer {{customerToken}}
+
+### 2. Create a reservation (table 3 = capacity 4) -> 201
+# @name createReservation
+POST {{baseUrl}}/api/reservations
+Content-Type: application/json
+Authorization: Bearer {{customerToken}}
+
+{
+  "table": "PASTE_TABLE_3_ID_HERE",
+  "date": "2026-12-31",
+  "timeSlot": "19:00",
+  "guests": 2
+}
+
+### 3. Double-book SAME table/date/slot -> 409 conflict
+POST {{baseUrl}}/api/reservations
+Content-Type: application/json
+Authorization: Bearer {{customerToken}}
+
+{
+  "table": "PASTE_TABLE_3_ID_HERE",
+  "date": "2026-12-31",
+  "timeSlot": "19:00",
+  "guests": 2
+}
+
+### 4. Guests > table capacity (table 3 holds 4, ask for 10) -> 400
+POST {{baseUrl}}/api/reservations
+Content-Type: application/json
+Authorization: Bearer {{customerToken}}
+
+{
+  "table": "PASTE_TABLE_3_ID_HERE",
+  "date": "2026-12-31",
+  "timeSlot": "20:00",
+  "guests": 10
+}
+
+### 5. Past date -> 400
+POST {{baseUrl}}/api/reservations
+Content-Type: application/json
+Authorization: Bearer {{customerToken}}
+
+{
+  "table": "PASTE_TABLE_3_ID_HERE",
+  "date": "2020-01-01",
+  "timeSlot": "19:00",
+  "guests": 2
+}
+
+### 6a. Log in as admin -> 200, capture token
+# @name loginAdmin
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "admin1234"
+}
+
+###
+@adminToken = {{loginAdmin.response.body.token}}
+
+### 6b. Admin GET all reservations -> 200
+GET {{baseUrl}}/api/reservations
+Authorization: Bearer {{adminToken}}
+
+### 6c. Admin GET all reservations filtered by date -> 200
+GET {{baseUrl}}/api/reservations?date=2026-12-31
+Authorization: Bearer {{adminToken}}
+
+### 7. Customer hits an admin-only route -> 403 forbidden
+GET {{baseUrl}}/api/reservations
+Authorization: Bearer {{customerToken}}
