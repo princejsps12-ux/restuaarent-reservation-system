@@ -6,6 +6,24 @@ admins manage every reservation.
 - **Backend**: Node.js + Express + MongoDB (Mongoose) + JWT — deploys to **Render**
 - **Frontend**: React + Vite + React Router — deploys to **Vercel**
 
+## 🔗 Live demo & test accounts
+
+- **Live app:** https://restuaarent-reservation-system.vercel.app
+- **API:** https://restuaarent-reservation-system.onrender.com
+
+Log in from the app's **Log in** page — the app routes you to the correct view
+based on your role (no separate admin URL). Both accounts below are pre-seeded:
+
+| Role | Email | Password |
+|------|-------|----------|
+| **Admin** | `admin@example.com` | `admin1234` |
+| **Customer** | `customer@example.com` | `customer1234` |
+
+You can also click **Register** to create your own customer account.
+
+> ⏳ The backend runs on Render's free tier and sleeps after ~15 min idle, so the
+> **first** login may take 30–50 seconds to wake up. Subsequent requests are fast.
+
 ```
 .
 ├── src/                 Express backend (routes / controllers / models / middleware / config)
